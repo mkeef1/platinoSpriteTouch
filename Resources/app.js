@@ -86,67 +86,44 @@
     touchables.push(world);
     touchables.push(world2);
     
-    world.addEventListener('touchstart', function(e){
-    	scene.add(this);
+    function handleObjTouch(e){
+    	var self = e.source;
     	
-    	touchables.splice(e.index, 1);
-    	touchables.push(this);
+    	if(e.type === 'touchstart'){
+    		scene.add(self);
     	
-    	this.diffX = e.x - this.center.x;
-    	this.diffY = e.y - this.center.y;
-    	this.hasTouch = true;
-    });
-    
-    world.addEventListener('touchmove', function(e){
-    	if(this.hasTouch){
-    		this.center = {
-    			x: e.x - this.diffX,
-    			y: e.y - this.diffY
-    		};
-    	};
-    });
-     
-    world.addEventListener('touchend', function(e){
-    	snapArea.fireEvent('checkDistance', {
-    		src: this,
-    		x: this.center.x,
-    		y: this.center.y
-    	});
-    	if(this.hasTouch){
-    		this.hasTouch = false;
+	    	touchables.splice(e.index, 1);
+	    	touchables.push(self);
+	    	
+	    	self.diffX = e.x - self.center.x;
+	    	self.diffY = e.y - self.center.y;
+	    	self.hasTouch = true;
+    	}else if(e.type === 'touchmove'){
+    		if(self.hasTouch){
+    			self.center = {
+    				x: e.x - self.diffX,
+    				y: e.y - self.diffY
+    			};
+    		}
+    	}else if(e.type === 'touchend'){
+    		snapArea.fireEvent('checkDistance', {
+    			src: self,
+    			x: self.center.x,
+    			y: self.center.y
+    		});
+    		if(self.hasTouch){
+    			self.hasTouch = false;
+    		}	
     	}
-    });
+    }
     
-    world2.addEventListener('touchstart', function(e){
-    	scene.add(this);
-    	
-    	touchables.splice(e.index, 1);
-    	touchables.push(this);
-    	
-    	this.diffX = e.x - this.center.x;
-    	this.diffY = e.y - this.center.y;
-    	this.hasTouch = true;
-    });
+    world.addEventListener('touchstart', handleObjTouch);
+    world.addEventListener('touchmove', handleObjTouch);
+    world.addEventListener('touchend', handleObjTouch);
     
-    world2.addEventListener('touchmove', function(e){
-    	if(this.hasTouch){
-    		this.center = {
-    			x: e.x - this.diffX,
-    			y: e.y - this.diffY
-    		};
-    	};
-    });
-     
-    world2.addEventListener('touchend', function(e){
-    	snapArea.fireEvent('checkDistance', {
-    		src: this,
-    		x: this.center.x,
-    		y: this.center.y
-    	});
-    	if(this.hasTouch){
-    		this.hasTouch = false;
-    	}
-    });
+    world2.addEventListener('touchstart', handleObjTouch);
+    world2.addEventListener('touchmove', handleObjTouch);
+    world2.addEventListener('touchend', handleObjTouch);
     
     function handleTouches(e){
     	var i = touchables.length,
