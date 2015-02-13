@@ -15,6 +15,18 @@
     //white background
     bg.color(1, 1, 1);
     
+    var snapArea = platino.createSprite({
+    	width: 100,
+    	height: 120,
+    	// alpha: 0.2
+    });
+    snapArea.color(1, 0, 0);
+    
+    snapArea.center = {
+    	x: _W - (snapArea.width * 0.5),
+    	y: _H - (snapArea.height * 0.5)
+    };
+    
     var world = platino.createSprite({
     	image: 'images/world.png',
     	width: 100,
@@ -39,8 +51,24 @@
     );
     
     scene.add(bg);
+    scene.add(snapArea);
     scene.add(world);
     scene.add(hello);
+   
+   	snapArea.addEventListener('checkDistance', function(e){
+   		var x = this.center.x,
+   			y = this.center.y,
+   			distance = Math.sqrt(
+   				((x - e.x) * (x - e.x)) + ((y - e.y) * (y - e.y))
+   			),
+   			threshold = 90;
+   		if(distance <= threshold){
+   			e.src.center = {
+   				x: this.center.x,
+   				y: this.center.y
+   			};
+   		}
+   	});
     
     touchables.push(world);
     
@@ -60,6 +88,11 @@
     });
      
     world.addEventListener('touchend', function(e){
+    	snapArea.fireEvent('checkDistance', {
+    		src: this,
+    		x: this.center.x,
+    		y: this.center.y
+    	});
     	if(this.hasTouch){
     		this.hasTouch = false;
     	}
