@@ -33,6 +33,13 @@
     	height: 100
     });
     
+    var world2 = platino.createSprite({
+    	image: 'images/world.png',
+    	width: 100,
+    	height: 100,
+    	// alpha: 0.2
+    });
+    
     var hello = platino.createTextSprite({
     	text: 'hello ',
     	fontSize: 18,
@@ -50,10 +57,16 @@
     	_H * 0.5 - (hello.height * 0.5) - 80
     );
     
+    world2.move(
+    	_W * 0.5 - (world.width * 0.5),
+    	_H * 0.5 - (world.height * 0.5) - 100
+    );
+    
     scene.add(bg);
     scene.add(snapArea);
     scene.add(world);
-    scene.add(hello);
+    scene.add(world2);
+    // scene.add(hello);
    
    	snapArea.addEventListener('checkDistance', function(e){
    		var x = this.center.x,
@@ -71,8 +84,14 @@
    	});
     
     touchables.push(world);
+    touchables.push(world2);
     
     world.addEventListener('touchstart', function(e){
+    	scene.add(this);
+    	
+    	touchables.splice(e.index, 1);
+    	touchables.push(this);
+    	
     	this.diffX = e.x - this.center.x;
     	this.diffY = e.y - this.center.y;
     	this.hasTouch = true;
@@ -98,6 +117,37 @@
     	}
     });
     
+    world2.addEventListener('touchstart', function(e){
+    	scene.add(this);
+    	
+    	touchables.splice(e.index, 1);
+    	touchables.push(this);
+    	
+    	this.diffX = e.x - this.center.x;
+    	this.diffY = e.y - this.center.y;
+    	this.hasTouch = true;
+    });
+    
+    world2.addEventListener('touchmove', function(e){
+    	if(this.hasTouch){
+    		this.center = {
+    			x: e.x - this.diffX,
+    			y: e.y - this.diffY
+    		};
+    	};
+    });
+     
+    world2.addEventListener('touchend', function(e){
+    	snapArea.fireEvent('checkDistance', {
+    		src: this,
+    		x: this.center.x,
+    		y: this.center.y
+    	});
+    	if(this.hasTouch){
+    		this.hasTouch = false;
+    	}
+    });
+    
     function handleTouches(e){
     	var i = touchables.length,
     		obj,
@@ -110,11 +160,13 @@
     		touched = obj.contains(x, y);
     		if(eventType === 'touchstart'){
     			if(touched){
-    				obj.fireEvent(eventType, {x: x, y: y});
+    				obj.fireEvent(eventType, {x: x, y: y, index: i});
+    				return true;
     			}
     		}else{
     			if(obj.hasTouch){
-    				obj.fireEvent(eventType, {x: x, y: y});
+    				obj.fireEvent(eventType, {x: x, y: y, index: i});
+    				return true;
     			}
     		}
     	}
